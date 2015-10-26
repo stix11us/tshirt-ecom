@@ -22,13 +22,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		exit;
 	}
 
+	require_once("inc/phpmailer/class.phpmailer.php");
+	$mail = new PHPMailer;
+	if(!$mail->ValidateAddress($email)){
+		echo "You must specify a valid email address.";
+		exit;
+	}
+
 	$email_body = "";
-	$email_body = $email_body . "Name: " . $name . "\n";
-	$email_body = $email_body . "Email: " . $email . "\n";
+	$email_body = $email_body . "Name: " . $name . "<br>";
+	$email_body = $email_body . "Email: " . $email . "<br>";
 	$email_body = $email_body . "Message: " . $message;
 	echo $email_body;
 
 	//TODO: Send Email
+	$mail->setFrom($email, $name);
+	$address = "orders@shirts4mike.com";
+	$mail->addAddress($address, "Shirts 4 Mike");
+	$mail->Subject = "Shirts 4 Mike Contact Form Submission | " . $name;
+	$mail->msgHTML($email_body);
+
+	//send the message, check for errors
+	if (!$mail->send()) {
+	    echo "There was a problem sending the email: " . $mail->ErrorInfo;
+	    exit;
+	} 
 
 	header("Location: contact.php?status=thanks");
 	exit;
